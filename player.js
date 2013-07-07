@@ -28,22 +28,28 @@ function Player(game, image)
 
     // references to game objects
     this.game = game;
+    this.map = game.map;
     this.objects = game.objects;
     this.keyboard = game.keyboard;
     this.cxt = game.cxt;
 }
-Player.prototype.update = function()
+Player.prototype.currentTile = function()
+{
+    return {x: Math.round((this.x + this.width/2)/32), y: Math.round((this.y - this.height/2)/32)};
+}
+Player.prototype.update = function(dt)
 {
     // Player is dead, play death animation
     if(!this.alive)
     {
+        console.log("ded");
         this.cxt.drawImage(this.image, 
                 this.animationOffsets["death"][0] + (this.width * this.currentFrame + (this.currentFrame*3)), this.animationOffsets["death"][1], 
                 this.width, this.height,
                 this.x, this.y, this.width, this.height);
-        if (this.currentFrame < 4)
-            this.lastUpdated++;
-        if(this.lastUpdated>=15)
+        if (this.currentFrame <= 4)
+            this.lastUpdated+=dt;
+        if(this.lastUpdated >= 200)
         {
             this.currentFrame++;
             this.lastUpdated = 0;
@@ -53,7 +59,7 @@ Player.prototype.update = function()
     // Movement + Related Animations
     if(this.keyboard[37] || this.keyboard[65])
     {
-        if(this.x > 0 && map.getTile(this.x-this.speed, this.y)==0)
+        if(this.x > 0 && this.map.getTile(this.x-this.speed, this.y)==0)
             this.x -= this.speed;
         if(this.currentAnimation!="left")
         {
@@ -64,8 +70,8 @@ Player.prototype.update = function()
     }
     else if(this.keyboard[39] || this.keyboard[68])
     {
-        if(this.x+this.width+3 <= (map.tiles[0].length)*map.width && 
-            map.getTile(this.x+this.width+this.speed+3, this.y)==0)
+        if(this.x+this.width+3 <= (this.map.tiles[0].length)*this.map.width && 
+            this.map.getTile(this.x+this.width+this.speed, this.y+this.height/2)==0)
             this.x+=this.speed;
 
         if(this.currentAnimation!="right")
@@ -75,9 +81,9 @@ Player.prototype.update = function()
             this.currentFrame, this.lastUpdated = 0;
         }
     }
-    else if(keyboard[38] || keyboard[87])
+    else if(this.keyboard[38] || this.keyboard[87])
     {
-        if(this.y > 0 && map.getTile(this.x, this.y-this.speed)==0)
+        if(this.y > 0 && this.map.getTile(this.x, this.y-this.speed)!=1)
             this.y -= this.speed;
 
         if(this.currentAnimation!="up")
@@ -87,10 +93,10 @@ Player.prototype.update = function()
             this.currentFrame, this.lastUpdated = 0;
         }
     }
-    else if(keyboard[40] || keyboard[83])
+    else if(this.keyboard[40] || this.keyboard[83])
     {
-        if(this.y+this.height < (map.tiles.length)*map.height && 
-            map.getTile(this.x, this.y + this.speed + this.height)==0)
+        if(this.y+this.height < (this.map.tiles.length)*this.map.height && 
+            this.map.getTile(this.x + this.width / 2, this.y + this.speed + this.height)==0)
             this.y += this.speed;
 
         if(this.currentAnimation!="down")
@@ -106,50 +112,50 @@ Player.prototype.update = function()
         this.currentFrame = 0;
     }
     // Drop the Bomb
-    if(this.keyboard[32] && this.bombCooldown > 180) //DROP THE BOMB
+    if(this.keyboard[32] && this.bombCooldown >= 2000) //DROP THE BOMB
     {
         this.bombCooldown = 0;
         //  check if player is dropping a bomb on a blocked tile, if they are the bomb spawns ontop of him
         switch(this.currentAnimation)
         {
             case "left":
-                if(map.getTile(this.x-33, this.y)==0)
+                if(this.map.getTile(this.x-33, this.y)==0)
                 {
-                    this.objects.push(new Bomb(this.x-33, this.y, 2));
+                    this.objects.push(new Bomb(this.x-33, this.y, this.game));
                 }
                 else
                 {
-                    this.objects.push(new Bomb(this.x, this.y, 2));
+                    this.objects.push(new Bomb(this.x, this.y, this.game));
                 }
             break;
             case "right":
-                if(map.getTile(this.x+33, this.y)==0)
+                if(this.map.getTile(this.x+33, this.y)==0)
                 {
-                    this.objects.push(new Bomb(this.x+33, this.y, 2));
+                    this.objects.push(new Bomb(this.x+33, this.y, this.game));
                 }
                 else
                 {
-                    this.objects.push(new Bomb(this.x, this.y, 2));
+                    this.objects.push(new Bomb(this.x, this.y, this.game));
                 }
             break;
             case "up":
-                if(map.getTile(this.x, this.y-33)==0)
+                if(this.map.getTile(this.x, this.y-33)==0)
                 {
-                    this.objects.push(new Bomb(this.x, this.y-33, 2));
+                    this.objects.push(new Bomb(this.x, this.y-33, this.game));
                 }
                 else
                 {
-                    this.objects.push(new Bomb(this.x, this.y, 2));
+                    this.objects.push(new Bomb(this.x, this.y, this.game));
                 }
             break;
             case "down":
-                if(map.getTile(this.x, this.y+33)==0)
+                if(this.map.getTile(this.x, this.y+33)==0)
                 {
-                    this.objects.push(new Bomb(this.x, this.y+33, 2));
+                    this.objects.push(new Bomb(this.x, this.y+33, this.game));
                 }
                 else
                 {
-                    this.objects.push(new Bomb(this.x, this.y, 2));
+                    this.objects.push(new Bomb(this.x, this.y, this.game));
                 }
             break;
         }
@@ -158,12 +164,12 @@ Player.prototype.update = function()
         this.animationOffsets[this.currentAnimation][0] + (this.width * this.currentFrame + (this.currentFrame*3)), this.animationOffsets[this.currentAnimation][1], 
         this.width, this.height,
         this.x, this.y, this.width, this.height);
-    this.lastUpdated++;
-    this.bombCooldown++;
+    this.lastUpdated+= dt;
+    this.bombCooldown+= dt;
 
-    if(this.lastUpdated==10 && !this.stand)
+    if(this.lastUpdated>=100 && !this.stand)
     {
-        this.ticks = 0;
+        this.lastUpdated = 0;
         this.currentFrame = (this.currentFrame + 1)%3;
 
     }   

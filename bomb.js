@@ -4,35 +4,37 @@ function Bomb(x, y, game)
 {
     this.x = x;
     this.y = y;
-    this.width = 13,
+    this.width = 15,
     this.height = 23,
 
     this.lifetime = 3;
     this.currentFrame = 0;
     this.animationOffsets = [0, 16, 32],
 
-    this.ticks = 0;
+    this.timePassed = 0;
     this.power = 2;
     this.done = false;
 
     this.image = game.bombImage;;
     this.game = game;
+    this.cxt = game.cxt;
+    console.log()
 }
-Bomb.prototype.update = function()
+Bomb.prototype.update = function(dt)
 {
-    this.ticks++;
+    this.timePassed += dt;
     if(this.lifetime <= 0)
     {
         this.done = true;
         this.game.explode(this.x, this.y, this.power);
     }
-    if(this.ticks==60) //  60 ticks per second (FPS)
+    if(this.timePassed >= 500) //  miliseconds, this number * lifetime = total time to blow up
     {
-        this.ticks = 0;
+        this.timePassed = 0;
         this.lifetime--;
         this.currentFrame++;
     }
-    cxt.drawImage(this.image,
+    this.cxt.drawImage(this.image,
         this.animationOffsets[this.currentFrame], 0, this.width, this.height,
         this.x, this.y, this.width, this.height);
 }
@@ -45,17 +47,20 @@ function Explosion(x, y, game)
     this.animationOffsets = [0, 34, 63, 98],
     this.width = 26,
     this.height = 27,
-    this.ticks = 0;
+    
+    this.animateTimer = 0;
     this.power = 2; //could be used for damage ?
     this.done = false;
 
     this.game = game;
+    this.cxt = game.cxt;
     this.map = this.game.map;
     this.image = game.explodeImage;
 }
-Explosion.prototype.update = function()
+Explosion.prototype.update = function(dt)
     {
-        this.ticks++;
+        console.log(dt);
+        this.animateTimer += dt;
         if(this.currentFrame==0)
         {
             var pos = this.map.getTileIndex(this.x, this.y);
@@ -67,17 +72,17 @@ Explosion.prototype.update = function()
                 this.game.player.alive = false;
             }
         }
-        if(this.ticks==10) //60 ticks per second (FPS)
+        if(this.animateTimer>=150) // 60 ticks per second (FPS)
         {
             if(this.currentFrame ==this.animationOffsets.length)
                 this.done = true;
             else
             {
-                this.ticks = 0;
+                this.animateTimer = 0;
                 this.currentFrame++;
             }
         }
-        cxt.drawImage(this.image,
+        this.cxt.drawImage(this.image,
             this.animationOffsets[this.currentFrame], 0, this.width, this.height,
             this.x, this.y, this.width, this.height);
     }

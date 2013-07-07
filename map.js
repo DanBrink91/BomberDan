@@ -20,10 +20,10 @@ function Map(game)
                 [0, 0, 0, 1, 1, 0, 0, 0],
                 ];
 }
-Map.prototype.update = function()
+Map.prototype.update = function(dt)
 {
-    for(var y = this.tiles.length - 1; y > 0; y--)
-        for(var x = this.tiles[y].length - 1; x > 0; x--)
+    for(var y = this.tiles.length - 1; y >= 0; y--)
+        for(var x = this.tiles[y].length - 1; x >= 0; x--)
         {
             this.cxt.drawImage(this.tileImages[this.tiles[y][x]],x*this.width, y*this.height);
         }
@@ -42,7 +42,16 @@ Map.prototype.getTileIndex = function(x, y)
 }
 //  Returns the actual tile value
 Map.prototype.getTile = function(x, y)
-{   if(x==0)
+{   
+    if(x < 0 || Math.ceil(x/this.width) > this.tiles[0].length ||
+        y < 0 || Math.ceil(y/this.height) > this.tiles.length)
+    {
+        console.log("Bounds", x, y);
+        console.log(this.tiles);
+        return 1;
+    }
+
+    if(x==0)
         x+=1;
     if(y==0)
         y+=1;

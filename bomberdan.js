@@ -30,15 +30,12 @@ function BomberDan()
 	this.objects = [];
 	this.keyboard = {};
 
-	this.player = new Player(this, "img/Bomberman.gif");
 	this.map = new Map(this);
+	this.player = new Player(this, "img/Bomberman.gif");
 
-	attachEvent(document, "keydown", function(e) {
-		this.keyboard[e.keyCode] = true;
-	});
-	attachEvent(document, "keyup", function(e) {
-		this.keyboard[e.keyCode] = false;
-	});
+	this.lastUpdated = 0;
+
+	requestAnimFrame(this.draw.bind(this));
 }
 
 //  Power will be used later, right now its hardcoded to 2
@@ -97,26 +94,38 @@ BomberDan.prototype.explode = function(x, y, power)
 }
 BomberDan.prototype.draw = function()
 {
-	window.requestAnimFrame(this.draw);
+	console.log(this.player.currentTile())
+	var dt = (new Date()).getTime() - this.lastUpdated;
 	this.cxt.clearRect(0,0,this.canvas.width,this.canvas.height);
-	this.map.update();
-	this.player.update();
-	for(var i = this.objects.length - 1; i > 0; i--)
+	this.map.update(dt);
+	this.player.update(dt);
+	for(var i = this.objects.length - 1; i >= 0; i--)
 	{
-		this.objects[i].update();
+		this.objects[i].update(dt);
 		if(this.objects[i].done)
 		{
+			console.log(this.objects);
 			this.objects.splice(i, 1);
+			console.log(this.objects);
 		}
 	}
+	this.lastUpdated = (new Date()).getTime();
+	window.requestAnimFrame(this.draw.bind(this));
 }
 
 window.onload = function(){
 	var game = new BomberDan();
-	window.requestAnimFrame(game.draw);
+	attachEvent(document, "keydown", function(e) {
+		game.keyboard[e.keyCode] = true;
+	});
+	attachEvent(document, "keyup", function(e) {
+		game.keyboard[e.keyCode] = false;
+	});
+
 	document.body.onmouseup = function(e) 
 	{
-		console.log(Game.map.getTileIndex(e.x, e.y));
+		console.log(game.map.getTileIndex(e.x, e.y));
+		console.log(game.objects);
 	};
 }
 //Input functions taken from http://hudson.joshy.org:9001/job/canvas-book/ws/out/chapter05.html
