@@ -42,7 +42,6 @@ Player.prototype.update = function(dt)
     // Player is dead, play death animation
     if(!this.alive)
     {
-        console.log("ded");
         this.cxt.drawImage(this.image, 
                 this.animationOffsets["death"][0] + (this.width * this.currentFrame + (this.currentFrame*3)), this.animationOffsets["death"][1], 
                 this.width, this.height,

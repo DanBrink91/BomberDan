@@ -94,7 +94,6 @@ BomberDan.prototype.explode = function(x, y, power)
 }
 BomberDan.prototype.draw = function()
 {
-	console.log(this.player.currentTile())
 	var dt = (new Date()).getTime() - this.lastUpdated;
 	this.cxt.clearRect(0,0,this.canvas.width,this.canvas.height);
 	this.map.update(dt);
@@ -104,9 +103,7 @@ BomberDan.prototype.draw = function()
 		this.objects[i].update(dt);
 		if(this.objects[i].done)
 		{
-			console.log(this.objects);
 			this.objects.splice(i, 1);
-			console.log(this.objects);
 		}
 	}
 	this.lastUpdated = (new Date()).getTime();

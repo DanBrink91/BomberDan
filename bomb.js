@@ -18,7 +18,6 @@ function Bomb(x, y, game)
     this.image = game.bombImage;;
     this.game = game;
     this.cxt = game.cxt;
-    console.log()
 }
 Bomb.prototype.update = function(dt)
 {
@@ -58,31 +57,30 @@ function Explosion(x, y, game)
     this.image = game.explodeImage;
 }
 Explosion.prototype.update = function(dt)
+{
+    this.animateTimer += dt;
+    if(this.currentFrame==0)
     {
-        console.log(dt);
-        this.animateTimer += dt;
-        if(this.currentFrame==0)
-        {
-            var pos = this.map.getTileIndex(this.x, this.y);
-            var playa = this.map.getTileIndex(this.game.player.x, this.game.player.y);
+        var pos = this.map.getTileIndex(this.x, this.y);
+        var playa = this.map.getTileIndex(this.game.player.x, this.game.player.y);
 
-            if(pos[0]==playa[0] && pos[1]==playa[1])
-            {
-                this.game.player.ticks, this.game.player.currentFrame = 0;
-                this.game.player.alive = false;
-            }
-        }
-        if(this.animateTimer>=150) // 60 ticks per second (FPS)
+        if(pos[0]==playa[0] && pos[1]==playa[1])
         {
-            if(this.currentFrame ==this.animationOffsets.length)
-                this.done = true;
-            else
-            {
-                this.animateTimer = 0;
-                this.currentFrame++;
-            }
+            this.game.player.ticks, this.game.player.currentFrame = 0;
+            this.game.player.alive = false;
         }
-        this.cxt.drawImage(this.image,
-            this.animationOffsets[this.currentFrame], 0, this.width, this.height,
-            this.x, this.y, this.width, this.height);
     }
+    if(this.animateTimer>=200) // 60 ticks per second (FPS)
+    {
+        if(this.currentFrame ==this.animationOffsets.length)
+            this.done = true;
+        else
+        {
+            this.animateTimer = 0;
+            this.currentFrame++;
+        }
+    }
+    this.cxt.drawImage(this.image,
+        this.animationOffsets[this.currentFrame], 0, this.width, this.height,
+        this.x, this.y, this.width, this.height);
+}
