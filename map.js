@@ -37,8 +37,7 @@ Map.prototype.getTileIndex = function(x, y)
         x+=1;
     if(y==0)
         y+=1;
-    //console.log(Math.ceil(y/32)-1 + " " +Math.ceil(x/32)-1);
-    return [Math.ceil(y/this.height)-1, Math.ceil(x/this.width)-1];
+    return [~~(y/this.height), ~~(x/this.width)];
 }
 //  Returns the actual tile value
 Map.prototype.getTile = function(x, y)
@@ -46,8 +45,6 @@ Map.prototype.getTile = function(x, y)
     if(x < 0 || Math.ceil(x/this.width) > this.tiles[0].length ||
         y < 0 || Math.ceil(y/this.height) > this.tiles.length)
     {
-        console.log("Bounds", x, y);
-        console.log(this.tiles);
         return 1;
     }
 
@@ -55,5 +52,5 @@ Map.prototype.getTile = function(x, y)
         x+=1;
     if(y==0)
         y+=1;
-    return this.tiles[Math.ceil(y/this.height)-1][Math.ceil(x/this.width)-1];
+    return this.tiles[~~(y/this.height)][~~(x/this.width)];
 }

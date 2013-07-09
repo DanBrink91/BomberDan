@@ -2,11 +2,12 @@
 // Contains BOTH Bomb + Explosions
 function Bomb(x, y, game)
 {
-    this.x = x;
-    this.y = y;
-    this.width = 15,
-    this.height = 23,
+    this.width = 14;
+    this.height = 23;
 
+    this.x = ~~(x * 32 / 32)  + this.width / 2;
+    this.y = ~~(y * 32 / 32) + this.height / 2;
+     
     this.lifetime = 3;
     this.currentFrame = 0;
     this.animationOffsets = [0, 16, 32],
@@ -15,7 +16,7 @@ function Bomb(x, y, game)
     this.power = 2;
     this.done = false;
 
-    this.image = game.bombImage;;
+    this.image = game.bombImage;
     this.game = game;
     this.cxt = game.cxt;
 }
@@ -35,7 +36,11 @@ Bomb.prototype.update = function(dt)
     }
     this.cxt.drawImage(this.image,
         this.animationOffsets[this.currentFrame], 0, this.width, this.height,
-        this.x, this.y, this.width, this.height);
+        this.x-10, this.y-16, this.width, this.height);
+
+    var tilePos = this.game.map.getTileIndex(this.x, this.y);
+    this.cxt.strokeStyle = "red";
+    this.cxt.strokeRect(tilePos[1] * 32, tilePos[0]* 32, 32, 32);
 }
 
 function Explosion(x, y, game)
@@ -61,16 +66,19 @@ Explosion.prototype.update = function(dt)
     this.animateTimer += dt;
     if(this.currentFrame==0)
     {
-        var pos = this.map.getTileIndex(this.x, this.y);
-        var playa = this.map.getTileIndex(this.game.player.x, this.game.player.y);
+        var explosion_tile_index = this.map.getTileIndex(this.x, this.y);
+        
+        var player_position = this.game.player.getPosition();
+        var player_tile_index = this.map.getTileIndex(player_position.x, player_position.y);
 
-        if(pos[0]==playa[0] && pos[1]==playa[1])
+        console.log(explosion_tile_index, player_tile_index);
+        if(explosion_tile_index[0]==player_tile_index[0] && explosion_tile_index[1]==player_tile_index[1])
         {
             this.game.player.ticks, this.game.player.currentFrame = 0;
             this.game.player.alive = false;
         }
     }
-    if(this.animateTimer>=200) // 60 ticks per second (FPS)
+    if(this.animateTimer>=200)
     {
         if(this.currentFrame ==this.animationOffsets.length)
             this.done = true;
@@ -80,6 +88,7 @@ Explosion.prototype.update = function(dt)
             this.currentFrame++;
         }
     }
+    
     this.cxt.drawImage(this.image,
         this.animationOffsets[this.currentFrame], 0, this.width, this.height,
         this.x, this.y, this.width, this.height);

@@ -20,6 +20,7 @@ function BomberDan()
 {
 	this.canvas = document.getElementById("canvas");
 	this.cxt = canvas.getContext("2d");
+	this.cxt.strokeStyle = "yellow";
 
 	this.bombImage = new Image();
 	this.explodeImage = new Image();

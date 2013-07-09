@@ -33,9 +33,9 @@ function Player(game, image)
     this.keyboard = game.keyboard;
     this.cxt = game.cxt;
 }
-Player.prototype.currentTile = function()
+Player.prototype.getPosition = function()
 {
-    return {x: Math.round((this.x + this.width/2)/32), y: Math.round((this.y - this.height/2)/32)};
+    return {x: ~~(this.x + this.width/2), y: ~~(this.y + this.height/2)};
 }
 Player.prototype.update = function(dt)
 {
@@ -94,7 +94,7 @@ Player.prototype.update = function(dt)
     }
     else if(this.keyboard[40] || this.keyboard[83])
     {
-        if(this.y+this.height < (this.map.tiles.length)*this.map.height && 
+        if(this.y+this.height + this.speed < (this.map.tiles.length)*this.map.height && 
             this.map.getTile(this.x + this.width / 2, this.y + this.speed + this.height)==0)
             this.y += this.speed;
 
@@ -150,7 +150,7 @@ Player.prototype.update = function(dt)
             case "down":
                 if(this.map.getTile(this.x, this.y+33)==0)
                 {
-                    this.objects.push(new Bomb(this.x, this.y+33, this.game));
+                    this.objects.push(new Bomb(this.x, this.y+32, this.game));
                 }
                 else
                 {
@@ -165,7 +165,11 @@ Player.prototype.update = function(dt)
         this.x, this.y, this.width, this.height);
     this.lastUpdated+= dt;
     this.bombCooldown+= dt;
-
+    var pos = this.getPosition();
+    var tilePos = this.map.getTileIndex(pos.x, pos.y);
+    console.log(tilePos);
+    this.cxt.strokeStyle = "yellow";
+    this.cxt.strokeRect(tilePos[1] * 32, tilePos[0]* 32, 32, 32);
     if(this.lastUpdated>=100 && !this.stand)
     {
         this.lastUpdated = 0;
