@@ -58,7 +58,7 @@ Player.prototype.update = function(dt)
     // Movement + Related Animations
     if(this.keyboard[37] || this.keyboard[65])
     {
-        if(this.x > 0 && this.map.getTile(this.x-this.speed, this.y)==0)
+        if(this.x > 0 && this.map.getTile(this.x-this.speed, this.y + this.height/2)==0)
             this.x -= this.speed;
         if(this.currentAnimation!="left")
         {
