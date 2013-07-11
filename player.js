@@ -3,7 +3,7 @@ function Player(game, image)
 {
     this.x = 1;
     this.y = 1;
-    this.width = 15;
+    this.width = 16;
     this.height = 24;
     
     this.currentFrame = 0;
@@ -15,16 +15,18 @@ function Player(game, image)
         "death":[152, 177],
     };
     this.currentAnimation = "down";
-    this.stand = true; //  used when standing to play only the first animation
+    this.idle = true; //  used when idleing to play only the first animation
 
     this.image = new Image();
     this.image.src = image;
 
     this.lastUpdated = 0;
-    this.speed = 1;
+    this.speed = 32; // Move one tile at a time
 
     this.alive = true;
-    this.bombCooldown = 3001;
+    this.bombCooldown = 3000;
+    this.movementCooldown = 350; // How long before you're allowed to move again
+    this.lastMoved = 0;
 
     // references to game objects
     this.game = game;
@@ -56,58 +58,71 @@ Player.prototype.update = function(dt)
         return;
     }
     // Movement + Related Animations
-    if(this.keyboard[37] || this.keyboard[65])
+    if(this.lastMoved > this.movementCooldown && 
+        (this.keyboard[37] || this.keyboard[65]))
     {
-        if(this.x > 0 && this.map.getTile(this.x-this.speed, this.y + this.height/2)==0)
+        if(this.map.getTile(this.x-this.speed,this.y)==0)
+        {
             this.x -= this.speed;
+            this.lastMoved = 0;
+        }
         if(this.currentAnimation!="left")
         {
-            this.stand = false;
+            this.idle = false;
             this.currentAnimation = "left";
             this.currentFrame, this.lastUpdated = 0;
         }
     }
-    else if(this.keyboard[39] || this.keyboard[68])
+    else if(this.lastMoved > this.movementCooldown && 
+        (this.keyboard[39] || this.keyboard[68]))
     {
-        if(this.x+this.width+3 <= (this.map.tiles[0].length)*this.map.width && 
-            this.map.getTile(this.x+this.width+this.speed, this.y+this.height/2)==0)
-            this.x+=this.speed;
-
+        if(this.map.getTile(this.x+this.speed, this.y)==0)
+        {
+            this.x += this.speed;
+            this.lastMoved = 0;
+        }
         if(this.currentAnimation!="right")
         {
-            this.stand = false;
+            this.idle = false;
             this.currentAnimation = "right";
             this.currentFrame, this.lastUpdated = 0;
         }
     }
-    else if(this.keyboard[38] || this.keyboard[87])
+    else if(this.lastMoved > this.movementCooldown && 
+        (this.keyboard[38] || this.keyboard[87]))
     {
-        if(this.y > 0 && this.map.getTile(this.x, this.y-this.speed)!=1)
+        if(this.map.getTile(this.x, this.y-this.speed)==0)
+        {
             this.y -= this.speed;
-
+            this.lastMoved = 0;
+        }
         if(this.currentAnimation!="up")
         {
-            this.stand = false;
+            this.idle = false;
             this.currentAnimation = "up";
             this.currentFrame, this.lastUpdated = 0;
         }
     }
-    else if(this.keyboard[40] || this.keyboard[83])
+    else if(this.lastMoved > this.movementCooldown && 
+        (this.keyboard[40] || this.keyboard[83]))
     {
-        if(this.y+this.height + this.speed < (this.map.tiles.length)*this.map.height && 
-            this.map.getTile(this.x + this.width / 2, this.y + this.speed + this.height)==0)
+        if(this.map.getTile(this.x, this.y + this.speed)==0)
+        {
             this.y += this.speed;
+            this.lastMoved = 0;
+        }
 
         if(this.currentAnimation!="down")
         {
-            this.stand = false;
+            this.idle = false;
             this.currentAnimation = "down";
             this.currentFrame, this.lastUpdated = 0;
         }
     }
     else
     {
-        this.stand = true;
+        this.lastMoved += dt;
+        this.idle = true;
         this.currentFrame = 0;
     }
     // Drop the Bomb
@@ -167,10 +182,10 @@ Player.prototype.update = function(dt)
     this.bombCooldown+= dt;
     var pos = this.getPosition();
     var tilePos = this.map.getTileIndex(pos.x, pos.y);
-    console.log(tilePos);
+
     this.cxt.strokeStyle = "yellow";
     this.cxt.strokeRect(tilePos[1] * 32, tilePos[0]* 32, 32, 32);
-    if(this.lastUpdated>=100 && !this.stand)
+    if(this.lastUpdated>=100 && !this.idle)
     {
         this.lastUpdated = 0;
         this.currentFrame = (this.currentFrame + 1)%3;

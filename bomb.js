@@ -5,9 +5,13 @@ function Bomb(x, y, game)
     this.width = 14;
     this.height = 23;
 
-    this.x = ~~(x * 32 / 32)  + this.width / 2;
-    this.y = ~~(y * 32 / 32) + this.height / 2;
-     
+    this.x = x;
+    this.y = y;
+    
+    // Seperate X, Y to draw it centered on the tile.
+    this.draw_x = x - this.width / 2  + 16;
+    this.draw_y = y + this.height / 2 - 16;
+
     this.lifetime = 3;
     this.currentFrame = 0;
     this.animationOffsets = [0, 16, 32],
@@ -36,7 +40,7 @@ Bomb.prototype.update = function(dt)
     }
     this.cxt.drawImage(this.image,
         this.animationOffsets[this.currentFrame], 0, this.width, this.height,
-        this.x-10, this.y-16, this.width, this.height);
+        this.draw_x, this.draw_y, this.width, this.height);
 
     var tilePos = this.game.map.getTileIndex(this.x, this.y);
     this.cxt.strokeStyle = "red";
