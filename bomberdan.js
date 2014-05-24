@@ -34,7 +34,7 @@ function BomberDan()
 	this.map = new Map(this);
 	this.player = new Player(this, "img/Bomberman.gif");
 
-	this.lastUpdated = 0;
+	this.lastUpdated = Date.now();
 
 	requestAnimFrame(this.draw.bind(this));
 }
@@ -93,9 +93,26 @@ BomberDan.prototype.explode = function(x, y, power)
 		}
 	}
 }
+BomberDan.prototype.update = function()
+{
+	var dt = 0.001 * (Date.now() - this.lastUpdated);
+
+	this.map.update(dt);
+	this.player.update(dt);
+
+	for(var i = this.objects.length - 1; i >= 0; i--)
+	{
+		this.objects[i].update(dt);
+		if(this.objects[i].done)
+		{
+			this.objects.splice(i, 1);
+		}
+	}
+	this.lastUpdated = Date.now();
+}
 BomberDan.prototype.draw = function()
 {
-	var dt = (new Date()).getTime() - this.lastUpdated;
+	var dt = 0.001 * (Date.now() - this.lastUpdated);
 	this.cxt.clearRect(0,0,this.canvas.width,this.canvas.height);
 	this.map.update(dt);
 	this.player.update(dt);
@@ -107,18 +124,24 @@ BomberDan.prototype.draw = function()
 			this.objects.splice(i, 1);
 		}
 	}
-	this.lastUpdated = (new Date()).getTime();
+	this.lastUpdated = Date.now();
 	window.requestAnimFrame(this.draw.bind(this));
 }
 
 window.onload = function(){
 	var game = new BomberDan();
-	attachEvent(document, "keydown", function(e) {
+	document.addEventListener("keydown", function(e) {
 		game.keyboard[e.keyCode] = true;
 	});
-	attachEvent(document, "keyup", function(e) {
+	// attachEvent(document, "keydown", function(e) {
+	// 	game.keyboard[e.keyCode] = true;
+	// });
+	document.addEventListener("keyup", function(e) {
 		game.keyboard[e.keyCode] = false;
 	});
+	// attachEvent(document, "keyup", function(e) {
+	// 	game.keyboard[e.keyCode] = false;
+	// });
 
 	document.body.onmouseup = function(e) 
 	{
